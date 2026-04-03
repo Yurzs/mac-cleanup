@@ -73,15 +73,24 @@ mod tests {
 
     #[test]
     fn test_double_star() {
-        assert!(glob_match("**/node_modules", "/Users/me/project/node_modules"));
+        assert!(glob_match(
+            "**/node_modules",
+            "/Users/me/project/node_modules"
+        ));
         assert!(glob_match("**/__pycache__", "/a/b/c/__pycache__"));
     }
 
     #[test]
     fn test_star_in_middle() {
-        assert!(glob_match("~/Projects/*/node_modules", "~/Projects/foo/node_modules"));
+        assert!(glob_match(
+            "~/Projects/*/node_modules",
+            "~/Projects/foo/node_modules"
+        ));
         // In exclude patterns, * matches across path separators (same as **).
-        assert!(glob_match("~/Projects/*/node_modules", "~/Projects/foo/bar/node_modules"));
+        assert!(glob_match(
+            "~/Projects/*/node_modules",
+            "~/Projects/foo/bar/node_modules"
+        ));
     }
 
     #[test]

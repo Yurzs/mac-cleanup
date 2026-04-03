@@ -14,10 +14,7 @@ pub fn log_deletion(path: &Path, size: u64, success: bool) {
     let status = if success { "OK" } else { "FAIL" };
     let timestamp = chrono_lite_timestamp();
 
-    let entry = format!(
-        "{timestamp}  {status}  {size:>12}  {}\n",
-        path.display()
-    );
+    let entry = format!("{timestamp}  {status}  {size:>12}  {}\n", path.display());
 
     if let Ok(mut f) = OpenOptions::new().create(true).append(true).open(log_path) {
         let _ = f.write_all(entry.as_bytes());

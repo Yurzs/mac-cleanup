@@ -7,18 +7,20 @@ pub fn expand_tilde(path: &str) -> PathBuf {
             return home.join(rest);
         }
     } else if path == "~"
-        && let Some(home) = dirs::home_dir() {
-            return home;
-        }
+        && let Some(home) = dirs::home_dir()
+    {
+        return home;
+    }
     PathBuf::from(path)
 }
 
 /// Shortens a path by replacing the home directory prefix with `~`.
 pub fn shorten_path(path: &Path) -> String {
     if let Some(home) = dirs::home_dir()
-        && let Ok(suffix) = path.strip_prefix(&home) {
-            return format!("~/{}", suffix.display());
-        }
+        && let Ok(suffix) = path.strip_prefix(&home)
+    {
+        return format!("~/{}", suffix.display());
+    }
     path.display().to_string()
 }
 

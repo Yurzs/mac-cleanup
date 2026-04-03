@@ -36,21 +36,23 @@ fn validate_rule(rule: &Rule) -> Vec<ValidationError> {
 
     // Validate clean_command if present.
     if let Some(cmd) = &rule.clean_command
-        && let Some(err) = validate_command(cmd) {
-            errors.push(ValidationError {
-                rule_id: rule.id.clone(),
-                reason: format!("clean_command: {err}"),
-            });
-        }
+        && let Some(err) = validate_command(cmd)
+    {
+        errors.push(ValidationError {
+            rule_id: rule.id.clone(),
+            reason: format!("clean_command: {err}"),
+        });
+    }
 
     // Validate ExternalCommand clean_cmd.
     if let RuleKind::ExternalCommand { clean_cmd, .. } = &rule.kind
-        && let Some(err) = validate_command(clean_cmd) {
-            errors.push(ValidationError {
-                rule_id: rule.id.clone(),
-                reason: format!("clean_cmd: {err}"),
-            });
-        }
+        && let Some(err) = validate_command(clean_cmd)
+    {
+        errors.push(ValidationError {
+            rule_id: rule.id.clone(),
+            reason: format!("clean_cmd: {err}"),
+        });
+    }
 
     errors
 }
@@ -118,7 +120,9 @@ fn validate_path(path_str: &str) -> Option<String> {
     for prefix in blocked_prefixes {
         if resolved_str.starts_with(prefix) {
             // Allow ~/Library/* but not /Library/*
-            if *prefix == "/Library" && resolved_str.starts_with(&format!("{}/Library", home.display())) {
+            if *prefix == "/Library"
+                && resolved_str.starts_with(&format!("{}/Library", home.display()))
+            {
                 continue;
             }
             return Some(format!("system path {prefix} is blocked"));
@@ -184,9 +188,7 @@ fn validate_command(cmd: &[String]) -> Option<String> {
     let dangerous_chars = [';', '|', '&', '$', '`', '(', ')', '{', '}', '<', '>'];
     for arg in cmd {
         if arg.chars().any(|c| dangerous_chars.contains(&c)) {
-            return Some(format!(
-                "argument '{arg}' contains shell metacharacters"
-            ));
+            return Some(format!("argument '{arg}' contains shell metacharacters"));
         }
     }
 
@@ -228,7 +230,15 @@ mod tests {
     fn test_valid_commands() {
         assert!(validate_command(&["go".into(), "clean".into(), "-cache".into()]).is_none());
         assert!(validate_command(&["brew".into(), "cleanup".into()]).is_none());
-        assert!(validate_command(&["npm".into(), "cache".into(), "clean".into(), "--force".into()]).is_none());
+        assert!(
+            validate_command(&[
+                "npm".into(),
+                "cache".into(),
+                "clean".into(),
+                "--force".into()
+            ])
+            .is_none()
+        );
     }
 
     #[test]

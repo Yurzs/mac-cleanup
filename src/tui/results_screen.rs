@@ -1,11 +1,13 @@
 use ratatui::prelude::*;
-use ratatui::widgets::{Block, Borders, Padding, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState};
+use ratatui::widgets::{
+    Block, Borders, Padding, Paragraph, Scrollbar, ScrollbarOrientation, ScrollbarState,
+};
 
 use crate::util::path::shorten_path;
 use crate::util::size::format_size;
 
-use super::theme;
 use super::App;
+use super::theme;
 
 pub fn draw(frame: &mut Frame, app: &App) {
     let area = frame.area();
@@ -83,11 +85,7 @@ fn draw_tree(frame: &mut Frame, app: &App, area: Rect) {
                 Span::styled(format!("{}", cat.category), style),
                 Span::styled(
                     format!("  ({count} items, {})", format_size(cat_size)),
-                    if is_cursor {
-                        style
-                    } else {
-                        theme::DIM_STYLE
-                    },
+                    if is_cursor { style } else { theme::DIM_STYLE },
                 ),
                 if selected_size > 0 && selected_size != cat_size {
                     Span::styled(
@@ -129,8 +127,12 @@ fn draw_tree(frame: &mut Frame, app: &App, area: Rect) {
                         // Use the risk of the first item for coloring the group.
                         let risk_style = match group.items[0].item.risk {
                             crate::rules::Risk::Safe => Style::default().fg(theme::SAFE_COLOR),
-                            crate::rules::Risk::Caution => Style::default().fg(theme::CAUTION_COLOR),
-                            crate::rules::Risk::Dangerous => Style::default().fg(theme::DANGEROUS_COLOR),
+                            crate::rules::Risk::Caution => {
+                                Style::default().fg(theme::CAUTION_COLOR)
+                            }
+                            crate::rules::Risk::Dangerous => {
+                                Style::default().fg(theme::DANGEROUS_COLOR)
+                            }
                         };
 
                         let line_style = if is_cursor {
@@ -146,11 +148,19 @@ fn draw_tree(frame: &mut Frame, app: &App, area: Rect) {
                             ),
                             Span::styled(
                                 group.rule_name.to_string(),
-                                if is_cursor { line_style } else { Style::default().fg(Color::White) },
+                                if is_cursor {
+                                    line_style
+                                } else {
+                                    Style::default().fg(Color::White)
+                                },
                             ),
                             Span::styled(
                                 format!(" ({group_count} items, {})", format_size(group_size)),
-                                if is_cursor { line_style } else { theme::DIM_STYLE },
+                                if is_cursor {
+                                    line_style
+                                } else {
+                                    theme::DIM_STYLE
+                                },
                             ),
                         ]));
                     }
@@ -194,7 +204,12 @@ fn draw_tree(frame: &mut Frame, app: &App, area: Rect) {
 }
 
 /// Render a single item line with the given indent prefix.
-fn render_item_line<'a>(lines: &mut Vec<Line<'a>>, entry: &'a super::ItemEntry, is_cursor: bool, indent: &'static str) {
+fn render_item_line<'a>(
+    lines: &mut Vec<Line<'a>>,
+    entry: &'a super::ItemEntry,
+    is_cursor: bool,
+    indent: &'static str,
+) {
     let checkbox = if entry.selected {
         theme::CHECKBOX_ON
     } else {
@@ -220,22 +235,41 @@ fn render_item_line<'a>(lines: &mut Vec<Line<'a>>, entry: &'a super::ItemEntry, 
     };
 
     lines.push(Line::from(vec![
-        Span::styled(format!("{indent}{checkbox} "), if is_cursor { line_style } else { risk_style }),
+        Span::styled(
+            format!("{indent}{checkbox} "),
+            if is_cursor { line_style } else { risk_style },
+        ),
         Span::styled(
             format!("{:<24}", entry.item.rule_name),
-            if is_cursor { line_style } else { Style::default().fg(Color::White) },
+            if is_cursor {
+                line_style
+            } else {
+                Style::default().fg(Color::White)
+            },
         ),
         Span::styled(
             format!("{:>10}", format_size(entry.item.size)),
-            if is_cursor { line_style } else { theme::SIZE_STYLE },
+            if is_cursor {
+                line_style
+            } else {
+                theme::SIZE_STYLE
+            },
         ),
         Span::styled(
             format!("  {}", shorten_path(&entry.item.path)),
-            if is_cursor { line_style } else { theme::PATH_STYLE },
+            if is_cursor {
+                line_style
+            } else {
+                theme::PATH_STYLE
+            },
         ),
         Span::styled(
             action_hint.to_string(),
-            if is_cursor { line_style } else { Style::default().fg(Color::DarkGray) },
+            if is_cursor {
+                line_style
+            } else {
+                Style::default().fg(Color::DarkGray)
+            },
         ),
     ]));
 }
@@ -245,10 +279,7 @@ fn draw_status_bar(frame: &mut Frame, app: &App, area: Rect) {
     let total_selected_size = app.selected_size();
 
     let scan_info = if let Some(stats) = &app.scan_stats {
-        format!(
-            "Scanned in {:.1}s",
-            stats.duration.as_secs_f64(),
-        )
+        format!("Scanned in {:.1}s", stats.duration.as_secs_f64(),)
     } else {
         String::new()
     };
@@ -261,7 +292,12 @@ fn draw_status_bar(frame: &mut Frame, app: &App, area: Rect) {
     let right = " Space:select  Tab:expand  a:all  n:none  Enter:clean  q:quit ";
 
     let bar = Line::from(vec![
-        Span::styled(left, Style::default().fg(Color::Green).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            left,
+            Style::default()
+                .fg(Color::Green)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::raw("  "),
         Span::styled(right, theme::HELP_STYLE),
     ]);

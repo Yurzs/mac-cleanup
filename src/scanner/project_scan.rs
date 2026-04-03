@@ -167,25 +167,23 @@ pub fn scan(rules: &[&Rule], root: &Path, tx: &mpsc::Sender<ScanEvent>) -> Vec<J
         // Check suffix matches (e.g., ".egg-info").
         for (suffix, target) in &suffix_targets {
             if file_name.ends_with(suffix.as_str())
-                && check_sibling(&entry_path, &target.confirm_siblings) {
-                    let size = dir_size(&entry_path);
-                    if size > 0 {
-                        items.push(JunkItem {
-                            rule_id: target.rule_id.clone(),
-                            rule_name: target.rule_name.clone(),
-                            category: target.category,
-                            risk: target.risk,
-                            path: entry_path.clone(),
-                            size,
-                            last_modified: entry_path
-                                .metadata()
-                                .ok()
-                                .and_then(|m| m.modified().ok()),
-                            clean_command: target.clean_command.clone(),
-                        });
-                        break;
-                    }
+                && check_sibling(&entry_path, &target.confirm_siblings)
+            {
+                let size = dir_size(&entry_path);
+                if size > 0 {
+                    items.push(JunkItem {
+                        rule_id: target.rule_id.clone(),
+                        rule_name: target.rule_name.clone(),
+                        category: target.category,
+                        risk: target.risk,
+                        path: entry_path.clone(),
+                        size,
+                        last_modified: entry_path.metadata().ok().and_then(|m| m.modified().ok()),
+                        clean_command: target.clean_command.clone(),
+                    });
+                    break;
                 }
+            }
         }
     }
 

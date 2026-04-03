@@ -1,8 +1,8 @@
 use ratatui::prelude::*;
 use ratatui::widgets::{Block, Borders, Gauge, Padding, Paragraph};
 
-use super::theme;
 use super::App;
+use super::theme;
 
 pub fn draw(frame: &mut Frame, app: &App) {
     let area = frame.area();

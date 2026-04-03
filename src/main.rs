@@ -75,10 +75,7 @@ fn resolve_rules(cli: &Cli) -> Vec<rules::Rule> {
             .filter(|s| s.detected)
             .map(|s| s.id.clone())
             .collect();
-        eprintln!(
-            "Auto-detected profiles: {}",
-            detected_ids.join(", ")
-        );
+        eprintln!("Auto-detected profiles: {}", detected_ids.join(", "));
         profiles::resolve_rules(&all_profiles, &detected_ids)
     } else {
         // Default: all rules (backwards compatible).
@@ -100,11 +97,7 @@ fn print_profiles_list() {
             "          ".to_string()
         };
 
-        let source = if status.builtin {
-            ""
-        } else {
-            " (external)"
-        };
+        let source = if status.builtin { "" } else { " (external)" };
 
         println!(
             "  {:<14} {badge}  {}{source}",

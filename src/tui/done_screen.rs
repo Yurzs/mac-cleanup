@@ -3,8 +3,8 @@ use ratatui::widgets::{Block, Borders, Padding, Paragraph};
 
 use crate::util::size::format_size;
 
-use super::theme;
 use super::App;
+use super::theme;
 
 pub fn draw(frame: &mut Frame, app: &App) {
     let area = frame.area();

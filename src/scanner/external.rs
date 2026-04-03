@@ -47,14 +47,13 @@ pub fn scan(rules: &[&Rule], tx: &mpsc::Sender<ScanEvent>) -> Vec<JunkItem> {
             }
             Ok(output) => {
                 let stderr = String::from_utf8_lossy(&output.stderr);
-                let reason = stderr
-                    .lines()
-                    .next()
-                    .unwrap_or("unknown error")
-                    .to_string();
+                let reason = stderr.lines().next().unwrap_or("unknown error").to_string();
 
                 // Distinguish "not running" from other failures.
-                let msg = if reason.contains("daemon") || reason.contains("connect") || reason.contains("sock") {
+                let msg = if reason.contains("daemon")
+                    || reason.contains("connect")
+                    || reason.contains("sock")
+                {
                     format!("{}: service not running — start it to scan", rule.name)
                 } else {
                     format!("{}: {}", rule.name, reason)
@@ -133,5 +132,8 @@ fn parse_docker_size(s: &str) -> Option<u64> {
         return None;
     };
 
-    num_str.parse::<f64>().ok().map(|n| (n * multiplier as f64) as u64)
+    num_str
+        .parse::<f64>()
+        .ok()
+        .map(|n| (n * multiplier as f64) as u64)
 }

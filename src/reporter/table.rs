@@ -134,8 +134,7 @@ pub fn print_table(items: &[JunkItem]) {
     );
     println!(
         "{}",
-        "\nActions: 'delete' = remove files/dirs  |  '$ ...' = run native cleanup command"
-            .dimmed()
+        "\nActions: 'delete' = remove files/dirs  |  '$ ...' = run native cleanup command".dimmed()
     );
 }
 

@@ -1,8 +1,8 @@
 use ratatui::prelude::*;
 use ratatui::widgets::{Block, Borders, Padding, Paragraph};
 
-use super::theme;
 use super::App;
+use super::theme;
 
 pub fn draw(frame: &mut Frame, app: &App) {
     let area = frame.area();
@@ -26,12 +26,10 @@ pub fn draw(frame: &mut Frame, app: &App) {
             Span::raw("  Scanning your system for junk..."),
         ]),
         Line::from(""),
-        Line::from(vec![
-            Span::styled(
-                format!("   Found {item_count} items so far"),
-                Style::default().fg(Color::Green),
-            ),
-        ]),
+        Line::from(vec![Span::styled(
+            format!("   Found {item_count} items so far"),
+            Style::default().fg(Color::Green),
+        )]),
         Line::from(""),
         Line::from(vec![Span::styled(
             format!("   {}", app.scan_progress),
@@ -39,10 +37,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
         )]),
         Line::from(""),
         Line::from(""),
-        Line::from(vec![Span::styled(
-            "   Press q to quit",
-            theme::HELP_STYLE,
-        )]),
+        Line::from(vec![Span::styled("   Press q to quit", theme::HELP_STYLE)]),
     ];
 
     let paragraph = Paragraph::new(text);

@@ -1,7 +1,7 @@
-pub mod cli;
 pub mod cleaner;
-pub mod profiles;
+pub mod cli;
 pub mod config;
+pub mod profiles;
 pub mod reporter;
 pub mod rules;
 pub mod scanner;

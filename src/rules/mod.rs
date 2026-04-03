@@ -9,7 +9,9 @@ use std::path::PathBuf;
 use std::time::SystemTime;
 
 /// Category of junk item.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Deserialize, serde::Serialize)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Deserialize, serde::Serialize,
+)]
 pub enum Category {
     DevCache,
     ProjectArtifact,
@@ -31,7 +33,9 @@ impl fmt::Display for Category {
 }
 
 /// Risk level for deleting an item.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Deserialize, serde::Serialize)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Deserialize, serde::Serialize,
+)]
 pub enum Risk {
     /// Safe to delete — will be re-downloaded/rebuilt as needed.
     Safe,
@@ -56,9 +60,7 @@ impl fmt::Display for Risk {
 #[serde(rename_all = "snake_case")]
 pub enum RuleKind {
     /// Fixed known path(s) — no scanning needed, just stat.
-    KnownPath {
-        paths: Vec<String>,
-    },
+    KnownPath { paths: Vec<String> },
     /// Requires walking a filesystem tree to discover.
     ProjectScan {
         /// Directory names that identify the junk (e.g., "node_modules", "target").

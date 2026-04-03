@@ -10,11 +10,11 @@ use std::io;
 use std::sync::mpsc;
 use std::time::Duration;
 
+use crossterm::ExecutableCommand;
 use crossterm::event::{self, Event, KeyCode, KeyEventKind};
 use crossterm::terminal::{self, EnterAlternateScreen, LeaveAlternateScreen};
-use crossterm::ExecutableCommand;
-use ratatui::prelude::*;
 use ratatui::Terminal;
+use ratatui::prelude::*;
 
 use crate::rules::{Category, CleanEvent, CleanStats, JunkItem, Risk, ScanEvent, ScanStats};
 
@@ -58,7 +58,11 @@ impl RuleGroup {
 
     /// Total size of selected items in this group.
     pub fn selected_size(&self) -> u64 {
-        self.items.iter().filter(|i| i.selected).map(|i| i.item.size).sum()
+        self.items
+            .iter()
+            .filter(|i| i.selected)
+            .map(|i| i.item.size)
+            .sum()
     }
 
     /// Number of items in this group.
@@ -214,10 +218,7 @@ impl App {
                     }
                 }
             }
-            CursorTarget::Group {
-                cat_idx,
-                group_idx,
-            } => {
+            CursorTarget::Group { cat_idx, group_idx } => {
                 let group = &mut self.categories[cat_idx].groups[group_idx];
                 let new_state = !group.selected;
                 group.selected = new_state;
@@ -225,10 +226,8 @@ impl App {
                     item.selected = new_state;
                 }
                 // Propagate upward: update category selected state.
-                self.categories[cat_idx].selected = self.categories[cat_idx]
-                    .groups
-                    .iter()
-                    .all(|g| g.selected);
+                self.categories[cat_idx].selected =
+                    self.categories[cat_idx].groups.iter().all(|g| g.selected);
             }
             CursorTarget::Item {
                 cat_idx,
@@ -242,10 +241,8 @@ impl App {
                 let group_all_selected = group.items.iter().all(|i| i.selected);
                 self.categories[cat_idx].groups[group_idx].selected = group_all_selected;
                 // Propagate upward: update category selected state.
-                self.categories[cat_idx].selected = self.categories[cat_idx]
-                    .groups
-                    .iter()
-                    .all(|g| g.selected);
+                self.categories[cat_idx].selected =
+                    self.categories[cat_idx].groups.iter().all(|g| g.selected);
             }
         }
     }
@@ -259,10 +256,7 @@ impl App {
             CursorTarget::Category { cat_idx } => {
                 self.categories[cat_idx].expanded = !self.categories[cat_idx].expanded;
             }
-            CursorTarget::Group {
-                cat_idx,
-                group_idx,
-            } => {
+            CursorTarget::Group { cat_idx, group_idx } => {
                 let group = &mut self.categories[cat_idx].groups[group_idx];
                 if group.is_multi() {
                     group.expanded = !group.expanded;
@@ -383,10 +377,7 @@ impl App {
                 // Group items by rule_id.
                 let mut rule_map: HashMap<String, Vec<JunkItem>> = HashMap::new();
                 for item in items {
-                    rule_map
-                        .entry(item.rule_id.clone())
-                        .or_default()
-                        .push(item);
+                    rule_map.entry(item.rule_id.clone()).or_default().push(item);
                 }
 
                 // Build RuleGroups, sorting items within each group by size descending.
@@ -467,8 +458,7 @@ impl App {
         loop {
             match rx.try_recv() {
                 Ok(CleanEvent::Deleting(path)) => {
-                    self.clean_current =
-                        Some(crate::util::path::shorten_path(&path));
+                    self.clean_current = Some(crate::util::path::shorten_path(&path));
                 }
                 Ok(CleanEvent::Deleted { .. }) => {
                     self.clean_progress.0 += 1;
@@ -515,14 +505,12 @@ pub fn run(scan_rx: mpsc::Receiver<ScanEvent>) -> anyhow::Result<()> {
         app.update_scroll_offset(terminal.size()?.height as usize);
 
         // Draw.
-        terminal.draw(|frame| {
-            match app.screen {
-                Screen::Scanning => scan_screen::draw(frame, &app),
-                Screen::Results => results_screen::draw(frame, &app),
-                Screen::Confirm => confirm_screen::draw(frame, &app),
-                Screen::Cleaning => clean_screen::draw(frame, &app),
-                Screen::Done => done_screen::draw(frame, &app),
-            }
+        terminal.draw(|frame| match app.screen {
+            Screen::Scanning => scan_screen::draw(frame, &app),
+            Screen::Results => results_screen::draw(frame, &app),
+            Screen::Confirm => confirm_screen::draw(frame, &app),
+            Screen::Cleaning => clean_screen::draw(frame, &app),
+            Screen::Done => done_screen::draw(frame, &app),
         })?;
 
         if app.should_quit {
@@ -544,72 +532,70 @@ pub fn run(scan_rx: mpsc::Receiver<ScanEvent>) -> anyhow::Result<()> {
 
         // Handle keyboard input.
         if event::poll(tick_rate)?
-            && let Event::Key(key) = event::read()? {
-                if key.kind != KeyEventKind::Press {
-                    continue;
-                }
-                match app.screen {
-                    Screen::Scanning => match key.code {
-                        KeyCode::Char('q') | KeyCode::Esc => app.should_quit = true,
-                        _ => {}
-                    },
-                    Screen::Results => match key.code {
-                        KeyCode::Char('q') | KeyCode::Esc => app.should_quit = true,
-                        KeyCode::Up | KeyCode::Char('k') => {
-                            if app.cursor > 0 {
-                                app.cursor -= 1;
-                            }
-                        }
-                        KeyCode::Down | KeyCode::Char('j') => {
-                            let max = app.visible_row_count().saturating_sub(1);
-                            if app.cursor < max {
-                                app.cursor += 1;
-                            }
-                        }
-                        KeyCode::Char(' ') => app.toggle_selection(),
-                        KeyCode::Tab => app.toggle_expand(),
-                        KeyCode::Char('a') => app.select_all(),
-                        KeyCode::Char('n') => app.select_none(),
-                        KeyCode::Enter => {
-                            if app.selected_count() > 0 {
-                                app.screen = Screen::Confirm;
-                            }
-                        }
-                        _ => {}
-                    },
-                    Screen::Confirm => match key.code {
-                        KeyCode::Esc | KeyCode::Char('q') => {
-                            app.screen = Screen::Results;
-                        }
-                        KeyCode::Enter => {
-                            // Start cleaning.
-                            let items: Vec<JunkItem> = app
-                                .selected_items()
-                                .into_iter()
-                                .cloned()
-                                .collect();
-                            let total = items.len();
-                            app.clean_progress = (0, total);
-
-                            let (tx, rx) = mpsc::channel();
-                            app.clean_rx = Some(rx);
-                            app.screen = Screen::Cleaning;
-
-                            std::thread::spawn(move || {
-                                crate::cleaner::executor::execute(items, tx);
-                            });
-                        }
-                        _ => {}
-                    },
-                    Screen::Cleaning => {},
-                    Screen::Done => match key.code {
-                        KeyCode::Char('q') | KeyCode::Esc | KeyCode::Enter => {
-                            app.should_quit = true;
-                        }
-                        _ => {}
-                    },
-                }
+            && let Event::Key(key) = event::read()?
+        {
+            if key.kind != KeyEventKind::Press {
+                continue;
             }
+            match app.screen {
+                Screen::Scanning => match key.code {
+                    KeyCode::Char('q') | KeyCode::Esc => app.should_quit = true,
+                    _ => {}
+                },
+                Screen::Results => match key.code {
+                    KeyCode::Char('q') | KeyCode::Esc => app.should_quit = true,
+                    KeyCode::Up | KeyCode::Char('k') => {
+                        if app.cursor > 0 {
+                            app.cursor -= 1;
+                        }
+                    }
+                    KeyCode::Down | KeyCode::Char('j') => {
+                        let max = app.visible_row_count().saturating_sub(1);
+                        if app.cursor < max {
+                            app.cursor += 1;
+                        }
+                    }
+                    KeyCode::Char(' ') => app.toggle_selection(),
+                    KeyCode::Tab => app.toggle_expand(),
+                    KeyCode::Char('a') => app.select_all(),
+                    KeyCode::Char('n') => app.select_none(),
+                    KeyCode::Enter => {
+                        if app.selected_count() > 0 {
+                            app.screen = Screen::Confirm;
+                        }
+                    }
+                    _ => {}
+                },
+                Screen::Confirm => match key.code {
+                    KeyCode::Esc | KeyCode::Char('q') => {
+                        app.screen = Screen::Results;
+                    }
+                    KeyCode::Enter => {
+                        // Start cleaning.
+                        let items: Vec<JunkItem> =
+                            app.selected_items().into_iter().cloned().collect();
+                        let total = items.len();
+                        app.clean_progress = (0, total);
+
+                        let (tx, rx) = mpsc::channel();
+                        app.clean_rx = Some(rx);
+                        app.screen = Screen::Cleaning;
+
+                        std::thread::spawn(move || {
+                            crate::cleaner::executor::execute(items, tx);
+                        });
+                    }
+                    _ => {}
+                },
+                Screen::Cleaning => {}
+                Screen::Done => match key.code {
+                    KeyCode::Char('q') | KeyCode::Esc | KeyCode::Enter => {
+                        app.should_quit = true;
+                    }
+                    _ => {}
+                },
+            }
+        }
     }
 
     // Restore terminal.

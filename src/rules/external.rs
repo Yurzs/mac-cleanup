@@ -16,7 +16,8 @@ pub fn rules() -> Vec<Rule> {
                 ],
             },
             risk: Risk::Caution,
-            description: "Docker images, containers, and build cache. Requires Docker to be running.".into(),
+            description:
+                "Docker images, containers, and build cache. Requires Docker to be running.".into(),
             clean_command: None,
             profile_id: None,
         },

@@ -3,7 +3,11 @@ use std::path::PathBuf;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug)]
-#[command(name = "mac-cleanup", version, about = "macOS disk cleanup tool for developers")]
+#[command(
+    name = "mac-cleanup",
+    version,
+    about = "macOS disk cleanup tool for developers"
+)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Option<Command>,

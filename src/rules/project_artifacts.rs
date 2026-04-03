@@ -11,7 +11,8 @@ pub fn rules() -> Vec<Rule> {
                 confirm_sibling: Some(vec!["package.json".into()]),
             },
             risk: Risk::Safe,
-            description: "Node.js dependencies. Restored with 'npm install' or 'yarn install'.".into(),
+            description: "Node.js dependencies. Restored with 'npm install' or 'yarn install'."
+                .into(),
             clean_command: None,
             profile_id: None,
         },
@@ -42,7 +43,8 @@ pub fn rules() -> Vec<Rule> {
                 ]),
             },
             risk: Risk::Safe,
-            description: "Python virtual environment. Recreate with 'python -m venv' or 'uv venv'.".into(),
+            description: "Python virtual environment. Recreate with 'python -m venv' or 'uv venv'."
+                .into(),
             clean_command: None,
             profile_id: None,
         },
@@ -129,7 +131,11 @@ pub fn rules() -> Vec<Rule> {
             name: "CMake build".into(),
             category: Category::ProjectArtifact,
             kind: RuleKind::ProjectScan {
-                target_names: vec!["build".into(), "cmake-build-debug".into(), "cmake-build-release".into()],
+                target_names: vec![
+                    "build".into(),
+                    "cmake-build-debug".into(),
+                    "cmake-build-release".into(),
+                ],
                 confirm_sibling: Some(vec!["CMakeLists.txt".into()]),
             },
             risk: Risk::Safe,

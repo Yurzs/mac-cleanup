@@ -82,8 +82,14 @@ pub fn rules() -> Vec<Rule> {
                 paths: vec!["~/.npm/_cacache".into()],
             },
             risk: Risk::Safe,
-            description: "npm package download cache. Equivalent to 'npm cache clean --force'.".into(),
-            clean_command: Some(vec!["npm".into(), "cache".into(), "clean".into(), "--force".into()]),
+            description: "npm package download cache. Equivalent to 'npm cache clean --force'."
+                .into(),
+            clean_command: Some(vec![
+                "npm".into(),
+                "cache".into(),
+                "clean".into(),
+                "--force".into(),
+            ]),
             profile_id: None,
         },
         Rule {
@@ -106,7 +112,9 @@ pub fn rules() -> Vec<Rule> {
                 paths: vec!["~/Library/pnpm/store".into()],
             },
             risk: Risk::Caution,
-            description: "pnpm content-addressable store. Uses hardlinks — other projects may reference it.".into(),
+            description:
+                "pnpm content-addressable store. Uses hardlinks — other projects may reference it."
+                    .into(),
             clean_command: None,
             profile_id: None,
         },
@@ -130,7 +138,8 @@ pub fn rules() -> Vec<Rule> {
                 paths: vec!["~/.gradle/caches".into()],
             },
             risk: Risk::Safe,
-            description: "Gradle dependency and build caches. Will be re-downloaded on next build.".into(),
+            description: "Gradle dependency and build caches. Will be re-downloaded on next build."
+                .into(),
             clean_command: None,
             profile_id: None,
         },
@@ -142,7 +151,8 @@ pub fn rules() -> Vec<Rule> {
                 paths: vec!["~/.m2/repository".into()],
             },
             risk: Risk::Safe,
-            description: "Maven local repository cache. Will be re-downloaded on next build.".into(),
+            description: "Maven local repository cache. Will be re-downloaded on next build."
+                .into(),
             clean_command: None,
             profile_id: None,
         },
@@ -154,7 +164,9 @@ pub fn rules() -> Vec<Rule> {
                 paths: vec!["~/Library/Caches/Homebrew".into()],
             },
             risk: Risk::Safe,
-            description: "Homebrew downloaded bottles and source archives. Equivalent to 'brew cleanup'.".into(),
+            description:
+                "Homebrew downloaded bottles and source archives. Equivalent to 'brew cleanup'."
+                    .into(),
             clean_command: Some(vec!["brew".into(), "cleanup".into(), "--prune=all".into()]),
             profile_id: None,
         },

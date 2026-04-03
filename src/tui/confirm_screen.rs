@@ -1,12 +1,12 @@
+use ratatui::layout::{Constraint, Direction, Layout};
 use ratatui::prelude::*;
 use ratatui::widgets::{Block, Borders, Padding, Paragraph};
-use ratatui::layout::{Layout, Direction, Constraint};
 
 use crate::util::path::shorten_path;
 use crate::util::size::format_size;
 
-use super::theme;
 use super::App;
+use super::theme;
 
 pub fn draw(frame: &mut Frame, app: &App) {
     let area = frame.area();
@@ -32,7 +32,10 @@ pub fn draw(frame: &mut Frame, app: &App) {
     let selected = app.selected_items();
     let total_size = app.selected_size();
 
-    let cmd_count = selected.iter().filter(|i| i.clean_command.is_some()).count();
+    let cmd_count = selected
+        .iter()
+        .filter(|i| i.clean_command.is_some())
+        .count();
     let delete_count = selected.len() - cmd_count;
 
     let mut lines = vec![
@@ -62,9 +65,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
     if dangerous_count > 0 {
         lines.push(Line::from(vec![Span::styled(
             format!("  WARNING: {dangerous_count} DANGEROUS items selected — may cause data loss!"),
-            Style::default()
-                .fg(Color::Red)
-                .add_modifier(Modifier::BOLD),
+            Style::default().fg(Color::Red).add_modifier(Modifier::BOLD),
         )]));
     }
     if caution_count > 0 {
@@ -115,10 +116,7 @@ pub fn draw(frame: &mut Frame, app: &App) {
 
         lines.push(Line::from(vec![
             Span::styled("  - ", Style::default().fg(risk_color)),
-            Span::styled(
-                format!("{:>10}", format_size(item.size)),
-                theme::SIZE_STYLE,
-            ),
+            Span::styled(format!("{:>10}", format_size(item.size)), theme::SIZE_STYLE),
             Span::raw("  "),
             Span::styled(shorten_path(&item.path), theme::PATH_STYLE),
             Span::styled(format!("  {action}"), Style::default().fg(Color::DarkGray)),
