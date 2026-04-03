@@ -3,6 +3,8 @@ name = "mac-cleanup"
 version = "0.1.0"
 edition = "2024"
 description = "macOS disk cleanup tool for developers"
+license = "MIT"
+repository = "https://github.com/nicksemikhatsky/mac-cleanup"
 
 [dependencies]
 # CLI
