@@ -18,16 +18,28 @@ Built in Rust with a TUI interface.
 
 ## Installation
 
-```sh
-# From source
-cargo install --path .
+### Homebrew (recommended)
 
-# Or just build and run
-cargo build --release
-./target/release/mac-cleanup
+```sh
+brew tap Yurzs/tap
+brew install mac-cleanup
 ```
 
-Requires Rust 2024 edition (1.85+).
+### From crates.io
+
+```sh
+cargo install mac-cleanup
+```
+
+### From source
+
+```sh
+git clone https://github.com/Yurzs/mac-cleanup.git
+cd mac-cleanup
+cargo install --path .
+```
+
+Building from source requires Rust 2024 edition (1.85+).
 
 ## Usage
 
