@@ -81,10 +81,7 @@ fn parse_size_from_output(stdout: &str, rule_id: &str) -> u64 {
         // even when empty, so fall-through would give a false positive. Count the
         // actual snapshot entries instead.
         "tm-local-snapshots" => {
-            if stdout
-                .lines()
-                .any(|l| l.contains("com.apple.TimeMachine"))
-            {
+            if stdout.lines().any(|l| l.contains("com.apple.TimeMachine")) {
                 1
             } else {
                 0
