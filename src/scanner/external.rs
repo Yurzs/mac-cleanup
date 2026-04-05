@@ -75,7 +75,21 @@ pub fn scan(rules: &[&Rule], tx: &mpsc::Sender<ScanEvent>) -> Vec<JunkItem> {
 /// Parse size from `docker system df` or similar output.
 fn parse_size_from_output(stdout: &str, rule_id: &str) -> u64 {
     match rule_id {
-        "docker-system" => parse_docker_df(stdout),
+        // Podman and Finch use docker-compatible `system df` output.
+        "docker-system" | "podman-system" | "finch-system" => parse_docker_df(stdout),
+        // `tmutil listlocalsnapshots /` always prints a "Snapshots for disk /:" header
+        // even when empty, so fall-through would give a false positive. Count the
+        // actual snapshot entries instead.
+        "tm-local-snapshots" => {
+            if stdout
+                .lines()
+                .any(|l| l.contains("com.apple.TimeMachine"))
+            {
+                1
+            } else {
+                0
+            }
+        }
         _ => {
             // For unknown formats, report nominal 1 byte to indicate "something found".
             if !stdout.trim().is_empty() { 1 } else { 0 }

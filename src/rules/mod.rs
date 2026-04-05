@@ -70,6 +70,25 @@ pub enum RuleKind {
         /// If multiple are provided, ANY match confirms.
         confirm_sibling: Option<Vec<String>>,
     },
+    /// Scan a parent directory for child entries whose names follow a
+    /// `<family><version>` pattern (alphabetic prefix followed by a
+    /// dot-separated numeric version like `2025.3` or `2025.3.1`), group them
+    /// by family, and flag all but the highest version in each family as
+    /// stale. Used for JetBrains IDE per-version config directories and
+    /// similar layouts where multiple release trains coexist.
+    GlobKeepLatest {
+        /// Parent directory whose children are scanned.
+        parent: String,
+    },
+    /// Match child entries of a parent directory against a name glob pattern.
+    /// Each match is emitted as a separate item. Used for things like
+    /// `/Applications/Install macOS*.app` where the exact name varies.
+    KnownPathGlob {
+        /// Parent directory whose children are scanned.
+        parent: String,
+        /// Glob pattern applied to each child's file name (e.g., "Install macOS*.app").
+        name_pattern: String,
+    },
     /// Requires invoking an external command.
     ExternalCommand {
         detect_cmd: Vec<String>,

@@ -14,7 +14,7 @@ pub fn is_excluded(path: &Path, patterns: &[String]) -> bool {
 
 /// Glob matching supporting `*` (any within segment) and `**` (any path).
 /// Handles multiple wildcards via recursive matching.
-fn glob_match(pattern: &str, text: &str) -> bool {
+pub fn glob_match(pattern: &str, text: &str) -> bool {
     let mut px = 0; // pattern index
     let mut tx = 0; // text index
     let mut star_px = usize::MAX; // last * position in pattern

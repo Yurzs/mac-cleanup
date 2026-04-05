@@ -34,6 +34,38 @@ fn validate_rule(rule: &Rule) -> Vec<ValidationError> {
         }
     }
 
+    // Validate the parent dir in GlobKeepLatest rules.
+    if let RuleKind::GlobKeepLatest { parent } = &rule.kind
+        && let Some(err) = validate_path(parent)
+    {
+        errors.push(ValidationError {
+            rule_id: rule.id.clone(),
+            reason: format!("parent {parent}: {err}"),
+        });
+    }
+
+    // Validate the parent dir + name pattern in KnownPathGlob rules.
+    if let RuleKind::KnownPathGlob {
+        parent,
+        name_pattern,
+    } = &rule.kind
+    {
+        if let Some(err) = validate_glob_parent(parent) {
+            errors.push(ValidationError {
+                rule_id: rule.id.clone(),
+                reason: format!("parent {parent}: {err}"),
+            });
+        }
+        if name_pattern.is_empty() || name_pattern.contains('/') {
+            errors.push(ValidationError {
+                rule_id: rule.id.clone(),
+                reason: format!(
+                    "name_pattern {name_pattern}: must be a non-empty single file name pattern"
+                ),
+            });
+        }
+    }
+
     // Validate clean_command if present.
     if let Some(cmd) = &rule.clean_command
         && let Some(err) = validate_command(cmd)
@@ -55,6 +87,18 @@ fn validate_rule(rule: &Rule) -> Vec<ValidationError> {
     }
 
     errors
+}
+
+/// Validate a KnownPathGlob parent directory. Accepts either home-relative
+/// paths (same rules as [`validate_path`]) or a small allowlist of absolute
+/// system directories whose children are safe to glob-match against.
+fn validate_glob_parent(path_str: &str) -> Option<String> {
+    // Allowlist of absolute parents where glob matching is explicitly permitted.
+    const ALLOWED_ABSOLUTE_PARENTS: &[&str] = &["/Applications"];
+    if ALLOWED_ABSOLUTE_PARENTS.contains(&path_str) {
+        return None;
+    }
+    validate_path(path_str)
 }
 
 /// Validate a target path is safe.
@@ -165,6 +209,10 @@ fn validate_command(cmd: &[String]) -> Option<String> {
         "gradle",
         "mvn",
         "docker",
+        "podman",
+        "finch",
+        "container",
+        "tmutil",
         "xcrun",
         "xcodebuild",
         "flutter",

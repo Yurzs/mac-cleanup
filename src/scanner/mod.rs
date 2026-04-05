@@ -1,5 +1,7 @@
 pub mod external;
+pub mod glob_keep_latest;
 pub mod known_path;
+pub mod known_path_glob;
 pub mod project_scan;
 pub mod size;
 
@@ -30,6 +32,36 @@ pub fn start_scan(
             .collect();
 
         for item in known_path::scan(&known_path_rules) {
+            if is_excluded(&item.path, &exclude_patterns) {
+                continue;
+            }
+            total_size += item.size;
+            total_items += 1;
+            let _ = tx.send(ScanEvent::ItemFound(item));
+        }
+
+        // Phase 1b: Scan GlobKeepLatest rules (stale per-version directories).
+        let glob_rules: Vec<&Rule> = rules
+            .iter()
+            .filter(|r| matches!(r.kind, RuleKind::GlobKeepLatest { .. }))
+            .collect();
+
+        for item in glob_keep_latest::scan(&glob_rules) {
+            if is_excluded(&item.path, &exclude_patterns) {
+                continue;
+            }
+            total_size += item.size;
+            total_items += 1;
+            let _ = tx.send(ScanEvent::ItemFound(item));
+        }
+
+        // Phase 1c: Scan KnownPathGlob rules (glob-matched entries in a parent dir).
+        let known_glob_rules: Vec<&Rule> = rules
+            .iter()
+            .filter(|r| matches!(r.kind, RuleKind::KnownPathGlob { .. }))
+            .collect();
+
+        for item in known_path_glob::scan(&known_glob_rules) {
             if is_excluded(&item.path, &exclude_patterns) {
                 continue;
             }
