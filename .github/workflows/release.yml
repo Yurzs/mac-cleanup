@@ -143,3 +143,71 @@ jobs:
         run: cargo publish
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  update-tap:
+    name: Bump Homebrew tap formula
+    needs: release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    env:
+      # Owner of the tap repo. Change if your tap lives elsewhere.
+      TAP_OWNER: Yurzs
+      TAP_REPO: homebrew-tap
+      FORMULA_PATH: Formula/mac-cleanup.rb
+    steps:
+      - name: Download universal artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mac-cleanup-universal-apple-darwin
+          path: universal
+
+      - name: Extract version and sha256
+        id: meta
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          SHA256=$(awk '{print $1}' universal/mac-cleanup-universal-apple-darwin.tar.gz.sha256)
+          if [ -z "$SHA256" ]; then
+            echo "::error::Failed to read sha256 from artifact"
+            exit 1
+          fi
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "sha256=${SHA256}" >> "$GITHUB_OUTPUT"
+          echo "Bumping to ${VERSION} with sha256 ${SHA256}"
+
+      - name: Checkout tap
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.TAP_OWNER }}/${{ env.TAP_REPO }}
+          token: ${{ secrets.TAP_GITHUB_TOKEN }}
+          path: tap
+
+      - name: Update formula
+        working-directory: tap
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+          SHA256: ${{ steps.meta.outputs.sha256 }}
+        run: |
+          if [ ! -f "${FORMULA_PATH}" ]; then
+            echo "::error::${FORMULA_PATH} not found in tap repo. Create it first (see README)."
+            exit 1
+          fi
+          # Update the version string and sha256. Uses | as delimiter so slashes in the URL survive.
+          sed -i "s|^  version \".*\"|  version \"${VERSION}\"|" "${FORMULA_PATH}"
+          sed -i "s|^  sha256 \".*\"|  sha256 \"${SHA256}\"|" "${FORMULA_PATH}"
+          echo "--- diff ---"
+          git diff "${FORMULA_PATH}"
+
+      - name: Commit and push
+        working-directory: tap
+        env:
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          if git diff --quiet "${FORMULA_PATH}"; then
+            echo "Formula already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${FORMULA_PATH}"
+          git commit -m "mac-cleanup ${VERSION}"
+          git push

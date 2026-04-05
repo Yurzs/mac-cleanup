@@ -1,10 +1,10 @@
 [package]
 name = "mac-cleanup"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2024"
 description = "macOS disk cleanup tool for developers"
 license = "MIT"
-repository = "https://github.com/nicksemikhatsky/mac-cleanup"
+repository = "https://github.com/Yurzs/mac-cleanup"
 
 [dependencies]
 # CLI
